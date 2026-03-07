@@ -49,7 +49,6 @@ const Courses = () => {
   return (
     <div className='h-[calc(100vh-80px)] flex flex-col p-4 md:p-6'>
       <div className='bg-white border border-neutral-300 rounded-xl flex flex-col h-full overflow-hidden'>
-        {/* HEADER */}
         <div className='flex items-center justify-between px-6 py-4 border-b border-neutral-300 shrink-0'>
           <h2 className='text-xl font-semibold text-blue-600'>Courses</h2>
 
@@ -59,18 +58,14 @@ const Courses = () => {
           </button>
         </div>
 
-        {/* COURSE LIST */}
         <div className='flex-1 overflow-y-auto divide-y divide-neutral-300'>
           {courses.map((course, index) => (
             <div key={index} className='flex items-start justify-between gap-4 px-6 py-6'>
-              {/* LEFT */}
               <div className='flex gap-4 flex-1 min-w-0'>
-                {/* COURSE IMAGE */}
                 <div className='w-16 h-16 rounded-md bg-neutral-200 shrink-0'></div>
 
-                {/* COURSE INFO */}
                 <div className='space-y-2 min-w-0'>
-                  <h3 className='font-semibold text-gray-800 break-words'>{course.title}</h3>
+                  <h3 className='font-semibold text-gray-800 wrap-break-words'>{course.title}</h3>
 
                   <div className='text-sm text-gray-600 flex flex-wrap gap-2'>
                     <span>{course.students} students</span>
@@ -84,7 +79,6 @@ const Courses = () => {
                 </div>
               </div>
 
-              {/* ACTION BUTTONS */}
               <div className='flex items-center gap-3 shrink-0'>
                 <button className='w-10 h-10 rounded-full bg-gray-100 hover:bg-blue-100 flex items-center justify-center transition'>
                   <Pencil size={18} className='text-blue-600' />
