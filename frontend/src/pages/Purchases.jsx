@@ -47,15 +47,12 @@ const Purchases = () => {
   return (
     <div className='p-4 md:p-6'>
       <div className='bg-white border border-neutral-300 rounded-xl overflow-hidden'>
-        {/* Page Title */}
         <div className='px-6 py-4 border-b border-neutral-300'>
           <h2 className='text-xl font-semibold text-blue-600'>Purchases</h2>
         </div>
 
-        {/* Table Wrapper */}
         <div className='overflow-auto max-h-[calc(100vh-200px)]'>
           <table className='w-full min-w-175'>
-            {/* Sticky Header */}
             <thead className='bg-neutral-50 border-b border-neutral-300 sticky top-0 z-10'>
               <tr className='text-left text-neutral-700 text-sm md:text-base'>
                 <th className='px-6 py-3 font-semibold'>User</th>
@@ -68,7 +65,6 @@ const Purchases = () => {
             <tbody className='divide-y divide-neutral-300'>
               {purchaseData.map((item, index) => (
                 <tr key={index} className='hover:bg-neutral-50 transition'>
-                  {/* USER */}
                   <td className='px-6 py-4'>
                     <div className='flex items-start gap-3'>
                       <div className='w-10 h-10 rounded-full bg-neutral-200 flex items-center justify-center text-neutral-600 font-medium'>
@@ -82,16 +78,13 @@ const Purchases = () => {
                     </div>
                   </td>
 
-                  {/* PLAN */}
                   <td className='px-6 py-4'>
                     <span className='text-neutral-800'>{item.plan}</span>
                     <span className='text-red-500 ml-1'>({item.status})</span>
                   </td>
 
-                  {/* PRICE */}
                   <td className='px-6 py-4 font-medium text-neutral-700'>{item.price}</td>
 
-                  {/* DATE */}
                   <td className='px-6 py-4 text-neutral-600 whitespace-nowrap'>{item.purchased}</td>
                 </tr>
               ))}
