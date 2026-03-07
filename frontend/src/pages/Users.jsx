@@ -27,7 +27,7 @@ export default function UsersPage() {
       {/* Remove overflow-hidden from the card */}
       <div className='w-full lg:max-w-6xl bg-white border border-neutral-300 rounded-2xl flex flex-col h-[84vh]'>
         {/* Search bar */}
-        <div className='px-6 py-4 border-b border-neutral-300 flex flex-col md:flex-row md:items-center md:justify-between gap-4 min-w-[600px]'>
+        <div className='px-6 py-4 border-b border-neutral-300 flex flex-col md:flex-row md:items-center md:justify-between gap-4 min-w-150'>
           <h2 className='text-xl font-semibold text-blue-600'>Users</h2>
           <div className='relative w-full md:w-80'>
             <Search
@@ -46,7 +46,7 @@ export default function UsersPage() {
 
         {/* Horizontal scroll wrapper */}
         <div className='overflow-x-auto flex-1'>
-          <div className='min-w-[600px] flex flex-col h-full'>
+          <div className='min-w-150 flex flex-col h-full'>
             {/* Table header */}
             <div className='grid grid-cols-[40%_40%_20%] px-6 py-4 text-sm font-medium text-neutral-600 border-b border-neutral-300 bg-neutral-50'>
               <span>User</span>
