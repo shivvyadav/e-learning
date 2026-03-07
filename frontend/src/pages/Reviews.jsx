@@ -66,9 +66,13 @@ const StarRating = ({rating}) => {
 
 const Reviews = () => {
   return (
-    <div className='p-4 md:p-6'>
-      <div className='bg-white border border-neutral-300 rounded-xl overflow-hidden'>
-        <div className='divide-y divide-neutral-300'>
+    <div className='h-[calc(100vh-80px)] flex flex-col p-4 md:p-6'>
+      <div className='bg-white border border-neutral-300 rounded-xl flex flex-col h-full overflow-hidden'>
+        <div className='border-b border-neutral-300 px-6 py-4 shrink-0'>
+          <h2 className='text-xl font-semibold text-blue-600'>Reviews</h2>
+        </div>
+
+        <div className='flex-1 overflow-y-auto divide-y divide-neutral-300'>
           {reviews.map((review, index) => (
             <div key={index} className='flex items-start justify-between gap-4 px-6 py-6'>
               <div className='flex gap-4 flex-1 min-w-0'>
@@ -80,7 +84,7 @@ const Reviews = () => {
                   <div className='flex flex-wrap items-center gap-2 text-sm md:text-base'>
                     <span className='font-medium text-gray-800'>{review.name}</span>
 
-                    <span className='text-blue-600 wrap-break-word-words'>{review.course}</span>
+                    <span className='text-blue-600 word-break'>{review.course}</span>
                   </div>
 
                   <StarRating rating={review.rating} />
