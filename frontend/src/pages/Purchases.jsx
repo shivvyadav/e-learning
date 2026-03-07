@@ -6,7 +6,7 @@ const purchaseData = [
     email: "sheikabbas242000@gmail.com",
     plan: "Weekly Plan (Prime LMS)",
     status: "Expired",
-    price: "₹95.00",
+    price: "95.00",
     purchased: "19 September, 2025 02:50 AM",
   },
   {
@@ -14,7 +14,7 @@ const purchaseData = [
     email: "ashok.viruna@gmail.com",
     plan: "Weekly Plan",
     status: "Expired",
-    price: "$0.99",
+    price: "0.99",
     purchased: "26 April, 2025 11:02 AM",
   },
   {
@@ -22,7 +22,7 @@ const purchaseData = [
     email: "arjl23pune@gmail.com",
     plan: "Weekly Plan",
     status: "Expired",
-    price: "₹99",
+    price: "99",
     purchased: "12 February, 2025 12:21 AM",
   },
   {
@@ -30,7 +30,7 @@ const purchaseData = [
     email: "lalitbhai7990@gmail.com",
     plan: "Weekly Plan",
     status: "Expired",
-    price: "₹99",
+    price: "99",
     purchased: "21 December, 2024 05:00 PM",
   },
   {
@@ -38,7 +38,7 @@ const purchaseData = [
     email: "samabac10@gmail.com",
     plan: "Monthly Plan",
     status: "Expired",
-    price: "$2.99",
+    price: "2.99",
     purchased: "16 December, 2024 05:54 PM",
   },
 ];
@@ -53,12 +53,12 @@ const Purchases = () => {
 
         <div className='overflow-auto max-h-[calc(100vh-200px)]'>
           <table className='w-full min-w-175'>
-            <thead className='bg-neutral-50 border-b border-neutral-300 sticky top-0 z-10'>
+            <thead className='bg-neutral-100  border-b border-neutral-300 sticky top-0 z-10'>
               <tr className='text-left text-neutral-700 text-sm md:text-base'>
-                <th className='px-6 py-3 font-semibold'>User</th>
-                <th className='px-6 py-3 font-semibold'>Subscription Plan</th>
-                <th className='px-6 py-3 font-semibold'>Price</th>
-                <th className='px-6 py-3 font-semibold'>Purchased At</th>
+                <th className='px-6 py-4 font-semibold'>User</th>
+                <th className='px-6 py-4 font-semibold'>Subscription Plan</th>
+                <th className='px-6 py-4 font-semibold'>Price</th>
+                <th className='px-6 py-4 font-semibold'>Purchased At</th>
               </tr>
             </thead>
 
@@ -83,7 +83,7 @@ const Purchases = () => {
                     <span className='text-red-500 ml-1'>({item.status})</span>
                   </td>
 
-                  <td className='px-6 py-4 font-medium text-neutral-700'>{item.price}</td>
+                  <td className='px-6 py-4 font-medium text-neutral-700'>Rs. {item.price}</td>
 
                   <td className='px-6 py-4 text-neutral-600 whitespace-nowrap'>{item.purchased}</td>
                 </tr>
