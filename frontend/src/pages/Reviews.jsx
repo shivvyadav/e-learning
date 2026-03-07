@@ -85,10 +85,8 @@ const Reviews = () => {
 
                   <StarRating rating={review.rating} />
 
-                  {/* Comment */}
                   {review.text && <p className='text-gray-700 text-sm'>{review.text}</p>}
 
-                  {/* Date */}
                   <div className='flex items-center gap-2 text-sm text-gray-500'>
                     <Clock size={16} />
                     {review.date}
@@ -96,7 +94,6 @@ const Reviews = () => {
                 </div>
               </div>
 
-              {/* Delete Button */}
               <button className='shrink-0 w-10 h-10 rounded-full bg-gray-100 hover:bg-red-100 flex items-center justify-center transition'>
                 <Trash2 size={18} className='text-blue-600 hover:text-red-500' />
               </button>
