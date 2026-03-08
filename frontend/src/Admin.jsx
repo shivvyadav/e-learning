@@ -31,13 +31,11 @@ export default function Admin() {
 
   return (
     <div className='w-full py-6 '>
-      {/* Cards Container */}
       <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-4'>
         {stats.map((item, index) => (
           <div
             key={index}
-            className='flex items-center justify-between bg-white rounded-xl shadow-sm p-6'>
-            {/* Left */}
+            className='flex items-center justify-between bg-neutral-50 rounded-xl shadow-sm p-6'>
             <div className='flex items-center gap-4'>
               <div className={`w-12 h-12 flex items-center justify-center rounded-full ${item.bg}`}>
                 {item.icon}
