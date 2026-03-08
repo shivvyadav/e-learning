@@ -36,7 +36,6 @@ export default function Admin() {
 
   return (
     <div className='p-4 md:p-6 space-y-6'>
-      {/* Stats */}
       <div className='grid gap-6 sm:grid-cols-2 lg:grid-cols-4'>
         {stats.map((item, index) => (
           <div
@@ -54,13 +53,11 @@ export default function Admin() {
         ))}
       </div>
 
-      {/* Section 1 */}
       <div className='grid gap-6 lg:grid-cols-2'>
         <NewUsers />
         <LatestReviews />
       </div>
 
-      {/* Section 2 */}
       <div className='grid gap-6 lg:grid-cols-2'>
         <LatestPurchases />
         <TopCourses />
