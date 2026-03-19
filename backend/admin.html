@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 16px; }
+    h1 { margin-top: 0; }
+    section { margin-bottom: 32px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 8px; }
+    th, td { border: 1px solid #ddd; padding: 6px 8px; }
+    th { background: #f3f3f3; text-align: left; }
+    button { margin-right: 4px; }
+    input, select, textarea { width: 100%; padding: 6px; margin: 4px 0 12px; box-sizing: border-box; }
+    .row { display: flex; gap: 16px; }
+    .col { flex: 1; }
+    .small { width: 100px; }
+    .hidden { display: none; }
+    .error { color: red; }
+  </style>
+</head>
+<body>
+  <h1>Dev Admin Dashboard</h1>
+  <p>This is a simple developer admin panel (no auth). Use it to manage courses, users, and enrollments.</p>
+
+  <section id="course-section">
+    <h2>Courses</h2>
+
+    <form id="course-form">
+      <h3 id="course-form-title">Add Course</h3>
+      <div class="row">
+        <div class="col">
+          <label>Title</label>
+          <input type="text" id="course_title" required />
+          <label>Description</label>
+          <textarea id="course_description" rows="2" required></textarea>
+          <label>Category</label>
+          <input type="text" id="course_category" />
+          <label>Price</label>
+          <input type="number" id="course_price" step="0.01" value="0" />
+        </div>
+        <div class="col">
+          <label>Thumbnail (image)</label>
+          <input type="file" id="course_thumbnail" accept="image/*" />
+          <label>Course ID (for edits)</label>
+          <input type="text" id="course_id" readonly />
+        </div>
+      </div>
+      <button id="course-submit">Save Course</button>
+      <button id="course-reset" type="button">Reset</button>
+      <div id="course-message" class="error"></div>
+    </form>
+
+    <h3>All Courses</h3>
+    <table id="courses-table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Price</th>
+          <th>Thumbnail</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section id="lessons-section" class="hidden">
+    <h2>Lessons for <span id="lessons-course-title"></span></h2>
+    <form id="lesson-form">
+      <h3 id="lesson-form-title">Add Lesson</h3>
+      <input type="hidden" id="lesson_course_id" />
+      <input type="hidden" id="lesson_id" />
+      <div class="row">
+        <div class="col">
+          <label>Lesson Title</label>
+          <input type="text" id="lesson_title" required />
+          <label>Order</label>
+          <input type="number" id="lesson_order" min="0" />
+        </div>
+        <div class="col">
+          <label>Video (mp4)</label>
+          <input type="file" id="lesson_video" accept="video/mp4" />
+        </div>
+      </div>
+      <button id="lesson-submit">Save Lesson</button>
+      <button id="lesson-reset" type="button">Reset</button>
+      <div id="lesson-message" class="error"></div>
+    </form>
+
+    <h3>All Lessons</h3>
+    <table id="lessons-table">
+      <thead>
+        <tr>
+          <th>Order</th>
+          <th>Title</th>
+          <th>Video</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section id="users-section">
+    <h2>Users</h2>
+    <table id="users-table">
+      <thead>
+        <tr>
+          <th>Username</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <section id="enrollments-section">
+    <h2>Enrollments</h2>
+    <table id="enrollments-table">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Course</th>
+          <th>Enrolled At</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <script>
+    const apiBase = '/api/admin';
+    const publicApiBase = '/api';
+    let currentCourseId = null;
+
+    const el = (id) => document.getElementById(id);
+    const toDate = (iso) => iso ? new Date(iso).toLocaleString() : '';
+
+    async function apiFetch(path, options = {}) {
+      const res = await fetch(apiBase + path, options);
+      if (!res.ok) throw new Error(await res.text());
+      return res.json();
+    }
+
+    async function loadCourses() {
+      const data = await apiFetch('/courses');
+      const tbody = el('courses-table').querySelector('tbody');
+      tbody.innerHTML = '';
+
+      data.data.forEach((c) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${c.Coursename}</td>
+          <td>${c.CoursePrice}</td>
+          <td>${c.coursethumbnail ? `<img src="${c.coursethumbnail}" width="80" />` : ''}</td>
+          <td>
+            <button data-id="${c._id}" data-title="${c.Coursename}" class="manage-lessons">Lessons</button>
+            <button data-id="${c._id}" class="edit-course">Edit</button>
+            <button data-id="${c._id}" class="delete-course">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function loadLessons(courseId) {
+      const response = await fetch(`${publicApiBase}/course/${courseId}/lessons`);
+      if (!response.ok) throw new Error(await response.text());
+      const payload = await response.json();
+      const lessons = payload.data || [];
+      const tbody = el('lessons-table').querySelector('tbody');
+      tbody.innerHTML = '';
+
+      lessons.forEach((lesson) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${lesson.order}</td>
+          <td>${lesson.lessonTitle}</td>
+          <td>${lesson.videoUrl ? `<a href="${lesson.videoUrl}" target="_blank">View</a>` : ''}</td>
+          <td>
+            <button data-id="${lesson._id}" data-title="${lesson.lessonTitle}" data-order="${lesson.order}" class="edit-lesson">Edit</button>
+            <button data-id="${lesson._id}" class="delete-lesson">Delete</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function showLessonManager(courseId, courseTitle) {
+      currentCourseId = courseId;
+      el('lesson_course_id').value = courseId;
+      el('lessons-course-title').textContent = courseTitle || '';
+      el('lessons-section').classList.remove('hidden');
+      resetLessonForm();
+      loadLessons(courseId).catch((err) => {
+        el('lesson-message').textContent = err.message;
+      });
+    }
+
+    async function saveLesson(e) {
+      e.preventDefault();
+      el('lesson-message').textContent = '';
+
+      if (!currentCourseId) {
+        el('lesson-message').textContent = 'Select a course first';
+        return;
+      }
+
+      const lessonId = el('lesson_id').value.trim();
+      const lessonTitle = el('lesson_title').value.trim();
+      const order = el('lesson_order').value;
+      const videoFile = el('lesson_video').files[0];
+
+      const form = new FormData();
+      form.append('lessonTitle', lessonTitle);
+      form.append('order', order);
+      if (videoFile) form.append('video', videoFile);
+
+      try {
+        if (lessonId) {
+          await fetch(`${apiBase}/lesson/${lessonId}`, { method: 'PUT', body: form });
+        } else {
+          await fetch(`${apiBase}/course/${currentCourseId}/lesson`, {
+            method: 'POST',
+            body: form,
+          });
+        }
+        await loadLessons(currentCourseId);
+        resetLessonForm();
+      } catch (err) {
+        el('lesson-message').textContent = err.message;
+      }
+    }
+
+    function resetLessonForm() {
+      el('lesson-form-title').textContent = 'Add Lesson';
+      el('lesson_id').value = '';
+      el('lesson_title').value = '';
+      el('lesson_order').value = '';
+      el('lesson_video').value = '';
+      el('lesson-message').textContent = '';
+    }
+
+    async function loadUsers() {
+      const data = await apiFetch('/users');
+      const tbody = el('users-table').querySelector('tbody');
+      tbody.innerHTML = '';
+
+      data.data.forEach((u) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${u.username}</td>
+          <td>${u.useremail}</td>
+          <td>${u.role || ''}</td>
+          <td><button data-id="${u._id}" class="delete-user">Delete</button></td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function loadEnrollments() {
+      const data = await apiFetch('/enrollments');
+      const tbody = el('enrollments-table').querySelector('tbody');
+      tbody.innerHTML = '';
+
+      data.data.forEach((e) => {
+        const tr = document.createElement('tr');
+        const user = e.user?.username || e.user?.useremail || '—';
+        const course = e.course?.Coursename || '—';
+        tr.innerHTML = `
+          <td>${user}</td>
+          <td>${course}</td>
+          <td>${toDate(e.createdAt)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function saveCourse(e) {
+      e.preventDefault();
+      el('course-message').textContent = '';
+
+      const id = el('course_id').value.trim();
+      const title = el('course_title').value.trim();
+      const description = el('course_description').value.trim();
+      const category = el('course_category').value.trim();
+      const price = el('course_price').value;
+
+      const form = new FormData();
+      form.append('Coursename', title);
+      form.append('Coursedescription', description);
+      form.append('category', category);
+      form.append('CoursePrice', price);
+
+      const thumb = el('course_thumbnail').files[0];
+
+      if (thumb) form.append('coursethumbnail', thumb);
+
+      try {
+        if (id) {
+          await fetch(`${apiBase}/course/${id}`, {
+            method: 'PUT',
+            body: form,
+          });
+        } else {
+          await fetch(`${apiBase}/course`, {
+            method: 'POST',
+            body: form,
+          });
+        }
+        resetCourseForm();
+        await loadCourses();
+      } catch (err) {
+        el('course-message').textContent = err.message;
+      }
+    }
+
+    function resetCourseForm() {
+      el('course-form-title').textContent = 'Add Course';
+      el('course_id').value = '';
+      el('course_title').value = '';
+      el('course_description').value = '';
+      el('course_category').value = '';
+      el('course_price').value = '0';
+      el('course_thumbnail').value = '';
+      el('course-message').textContent = '';
+    }
+
+    function initEventHandlers() {
+      el('course-form').addEventListener('submit', saveCourse);
+      el('course-reset').addEventListener('click', resetCourseForm);
+
+      el('courses-table').addEventListener('click', async (evt) => {
+        const btn = evt.target;
+        if (btn.matches('.delete-course')) {
+          const id = btn.dataset.id;
+          if (!confirm('Delete this course?')) return;
+          await fetch(`${apiBase}/course/${id}`, { method: 'DELETE' });
+          await loadCourses();
+          return;
+        }
+        if (btn.matches('.edit-course')) {
+          const id = btn.dataset.id;
+          const res = await apiFetch(`/course/${id}`);
+          const c = res.data[0];
+          el('course_id').value = c._id;
+          el('course_title').value = c.Coursename;
+          el('course_description').value = c.Coursedescription;
+          el('course_category').value = c.category || '';
+          el('course_price').value = c.CoursePrice || 0;
+          el('course-form-title').textContent = 'Edit Course';
+          return;
+        }
+        if (btn.matches('.manage-lessons')) {
+          const id = btn.dataset.id;
+          const title = btn.dataset.title;
+          showLessonManager(id, title);
+        }
+      });
+
+      el('users-table').addEventListener('click', async (evt) => {
+        const btn = evt.target;
+        if (btn.matches('.delete-user')) {
+          const id = btn.dataset.id;
+          if (!confirm('Delete this user?')) return;
+          await fetch(`${apiBase}/user/${id}`, { method: 'DELETE' });
+          await loadUsers();
+        }
+      });
+
+      el('lesson-form').addEventListener('submit', saveLesson);
+      el('lesson-reset').addEventListener('click', resetLessonForm);
+
+      el('lessons-table').addEventListener('click', async (evt) => {
+        const btn = evt.target;
+        if (btn.matches('.delete-lesson')) {
+          const id = btn.dataset.id;
+          if (!confirm('Delete this lesson?')) return;
+          await fetch(`${apiBase}/lesson/${id}`, { method: 'DELETE' });
+          if (currentCourseId) await loadLessons(currentCourseId);
+          return;
+        }
+        if (btn.matches('.edit-lesson')) {
+          const id = btn.dataset.id;
+          el('lesson_id').value = id;
+          el('lesson_title').value = btn.dataset.title || '';
+          el('lesson_order').value = btn.dataset.order ?? '';
+          el('lesson-form-title').textContent = 'Edit Lesson';
+        }
+      });
+    }
+
+    async function init() {
+      initEventHandlers();
+      await Promise.all([loadCourses(), loadUsers(), loadEnrollments()]);
+    }
+
+    init().catch((err) => {
+      console.error(err);
+      alert('Failed to load admin dashboard: ' + err.message);
+    });
+  </script>
+</body>
+</html>
