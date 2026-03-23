@@ -1,95 +1,105 @@
-import {useState} from "react";
-
-const purchaseData = [
-  {
-    name: "Sheikabbas S",
-    email: "sheikabbas242000@gmail.com",
-    plan: "Weekly Plan (Prime LMS)",
-    status: "Expired",
-    price: "95.00",
-    purchased: "19 September, 2025 02:50 AM",
-  },
-  {
-    name: "No Name",
-    email: "ashok.viruna@gmail.com",
-    plan: "Weekly Plan",
-    status: "Expired",
-    price: "0.99",
-    purchased: "26 April, 2025 11:02 AM",
-  },
-  {
-    name: "Atharav Joshi",
-    email: "arjl23pune@gmail.com",
-    plan: "Weekly Plan",
-    status: "Expired",
-    price: "99",
-    purchased: "12 February, 2025 12:21 AM",
-  },
-  {
-    name: "Lalit Sharma",
-    email: "lalitbhai7990@gmail.com",
-    plan: "Weekly Plan",
-    status: "Expired",
-    price: "99",
-    purchased: "21 December, 2024 05:00 PM",
-  },
-  {
-    name: "Sama Bac",
-    email: "samabac10@gmail.com",
-    plan: "Monthly Plan",
-    status: "Expired",
-    price: "2.99",
-    purchased: "16 December, 2024 05:54 PM",
-  },
-];
+import React from "react";
+import {useAuth} from "../context/AdminContext";
 
 const Purchases = () => {
+  // Pulling live data and loading state from Context
+  const {enrollments, dataLoading} = useAuth();
+
+  // Helper to format dates nicely
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   return (
     <div className='p-4 md:p-6'>
-      <div className='bg-white border border-neutral-300 rounded-xl overflow-hidden'>
-        <div className='px-6 py-4 border-b border-neutral-300'>
-          <h2 className='text-xl font-semibold text-blue-600'>Purchases</h2>
+      <div className='bg-white border border-neutral-300 rounded-xl overflow-hidden shadow-sm'>
+        <div className='px-6 py-4 border-b border-neutral-300 flex justify-between items-center'>
+          <h2 className='text-xl font-semibold text-blue-600'>Enrollments</h2>
+          <span className='text-sm bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-medium'>
+            Total: {enrollments.length}
+          </span>
         </div>
 
         <div className='overflow-auto max-h-[calc(100vh-200px)]'>
-          <table className='w-full min-w-175'>
-            <thead className='bg-neutral-100  border-b border-neutral-300 sticky top-0 z-10'>
-              <tr className='text-left text-neutral-700 text-sm md:text-base'>
-                <th className='px-6 py-4 font-semibold'>User</th>
-                <th className='px-6 py-4 font-semibold'>Subscription Plan</th>
-                <th className='px-6 py-4 font-semibold'>Price</th>
-                <th className='px-6 py-4 font-semibold'>Purchased At</th>
-              </tr>
-            </thead>
-
-            <tbody className='divide-y divide-neutral-300'>
-              {purchaseData.map((item, index) => (
-                <tr key={index} className='hover:bg-neutral-50 transition'>
-                  <td className='px-6 py-4'>
-                    <div className='flex items-start gap-3'>
-                      <div className='w-10 h-10 rounded-full bg-neutral-200 flex items-center justify-center text-neutral-600 font-medium'>
-                        {item.name.charAt(0)}
-                      </div>
-
-                      <div className='min-w-0'>
-                        <p className='font-medium text-neutral-800'>{item.name}</p>
-                        <p className='text-sm text-neutral-500 break-all'>{item.email}</p>
-                      </div>
-                    </div>
-                  </td>
-
-                  <td className='px-6 py-4'>
-                    <span className='text-neutral-800'>{item.plan}</span>
-                    <span className='text-red-500 ml-1'>({item.status})</span>
-                  </td>
-
-                  <td className='px-6 py-4 font-medium text-neutral-700'>Rs. {item.price}</td>
-
-                  <td className='px-6 py-4 text-neutral-600 whitespace-nowrap'>{item.purchased}</td>
+          {dataLoading ? (
+            <div className='flex items-center justify-center py-20'>
+              <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+            </div>
+          ) : enrollments.length === 0 ? (
+            <div className='text-center py-20 text-neutral-500'>No enrollment records found.</div>
+          ) : (
+            <table className='w-full min-w-175'>
+              <thead className='bg-neutral-100 border-b border-neutral-300 sticky top-0 z-10'>
+                <tr className='text-left text-neutral-700 text-sm md:text-base'>
+                  <th className='px-6 py-4 font-semibold'>User</th>
+                  <th className='px-6 py-4 font-semibold'>Course Name</th>
+                  <th className='px-6 py-4 font-semibold'>Status</th>
+                  <th className='px-6 py-4 font-semibold'>Price</th>
+                  <th className='px-6 py-4 font-semibold'>Purchased At</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+
+              <tbody className='divide-y divide-neutral-300'>
+                {enrollments.map((item) => (
+                  <tr key={item._id} className='hover:bg-neutral-50 transition'>
+                    {/* User Info Column */}
+                    <td className='px-6 py-4'>
+                      <div className='flex items-center gap-3'>
+                        <div className='w-10 h-10 shrink-0 rounded-full bg-[#3B4CCA] flex items-center justify-center text-white font-medium'>
+                          {item.user?.username?.charAt(0) || "U"}
+                        </div>
+
+                        <div className='min-w-0'>
+                          <p className='font-medium text-neutral-800 truncate'>
+                            {item.user?.username || "Unknown User"}
+                          </p>
+                          <p className='text-sm text-neutral-500 truncate'>
+                            {item.user?.useremail || "No Email"}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Course Column */}
+                    <td className='px-6 py-4'>
+                      <span className='text-neutral-800 font-medium'>
+                        {item.course?.Coursename || "Deleted Course"}
+                      </span>
+                    </td>
+
+                    {/* Status Column */}
+                    <td className='px-6 py-4'>
+                      <span
+                        className={`px-2 py-1 rounded-md text-xs font-bold uppercase ${
+                          item.status === "active"
+                            ? "bg-green-100 text-green-600"
+                            : "bg-blue-100 text-blue-600"
+                        }`}>
+                        {item.status}
+                      </span>
+                    </td>
+
+                    {/* Price Column */}
+                    <td className='px-6 py-4 font-medium text-neutral-700'>
+                      $ {item.course?.CoursePrice || "0"}
+                    </td>
+
+                    {/* Date Column */}
+                    <td className='px-6 py-4 text-neutral-600 whitespace-nowrap text-sm'>
+                      {formatDate(item.enrolleddate)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>
