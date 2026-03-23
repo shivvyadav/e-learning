@@ -1,42 +1,6 @@
-import {Trash2, Clock} from "lucide-react";
-
-const reviews = [
-  {
-    name: "Nexora technology",
-    course: "The Complete Flutter Development Bootcamp with Dart",
-    rating: 5,
-    text: "very good",
-    date: "15 December, 2025 03:16 PM",
-  },
-  {
-    name: "Samuel Moses",
-    course: "A Crash Course In Wedding Photography",
-    rating: 5,
-    text: "",
-    date: "13 December, 2025 02:29 PM",
-  },
-  {
-    name: "test",
-    course: "A Crash Course In Wedding Photography",
-    rating: 4,
-    text: "",
-    date: "29 October, 2025 09:27 AM",
-  },
-  {
-    name: "No Name",
-    course: "User Experience Design Fundamentals",
-    rating: 4.5,
-    text: "",
-    date: "21 October, 2025 02:14 PM",
-  },
-  {
-    name: "Virendra Meena",
-    course: "Salary Negotiation: How to Negotiate a Raise or Promotion",
-    rating: 2.5,
-    text: "Testing fase",
-    date: "15 October, 2025",
-  },
-];
+import React from "react";
+import {Clock} from "lucide-react";
+import {useAuth} from "../context/AdminContext";
 
 const StarRating = ({rating}) => {
   const stars = [1, 2, 3, 4, 5];
@@ -58,51 +22,87 @@ const StarRating = ({rating}) => {
           </span>
         ))}
       </div>
-
-      <span className='text-yellow-500 font-medium'>{rating.toFixed(2)}</span>
+      <span className='text-yellow-500 font-medium'>
+        {typeof rating === "number" ? rating.toFixed(1) : "0.0"}
+      </span>
     </div>
   );
 };
 
 const Reviews = () => {
+  const {reviews, dataLoading} = useAuth();
+
+  // Helper to format the date
+  const formatDate = (dateString) => {
+    if (!dateString) return "No date";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
   return (
     <div className='h-[calc(100vh-80px)] flex flex-col p-4 md:p-6'>
-      <div className='bg-white border border-neutral-300 rounded-xl flex flex-col h-full overflow-hidden'>
-        <div className='border-b border-neutral-300 px-6 py-4 shrink-0'>
-          <h2 className='text-xl font-semibold text-blue-600'>Reviews</h2>
+      <div className='bg-white border border-neutral-300 rounded-xl flex flex-col h-full overflow-hidden shadow-sm'>
+        <div className='border-b border-neutral-300 px-6 py-4 shrink-0 flex justify-between items-center'>
+          <h2 className='text-xl font-semibold text-blue-600'>Course Reviews</h2>
+          <span className='text-sm bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-medium'>
+            Total: {reviews.length}
+          </span>
         </div>
 
         <div className='flex-1 overflow-y-auto divide-y divide-neutral-300'>
-          {reviews.map((review, index) => (
-            <div key={index} className='flex items-start justify-between gap-4 px-6 py-6'>
-              <div className='flex gap-4 flex-1 min-w-0'>
-                <div className='w-12 h-12 shrink-0 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold'>
-                  {review.name.charAt(0).toUpperCase()}
-                </div>
-
-                <div className='space-y-2 min-w-0'>
-                  <div className='flex flex-wrap items-center gap-2 text-sm md:text-base'>
-                    <span className='font-medium text-gray-800'>{review.name}</span>
-
-                    <span className='text-blue-600 word-break'>{review.course}</span>
+          {dataLoading ? (
+            <div className='flex items-center justify-center py-20'>
+              <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600'></div>
+            </div>
+          ) : reviews.length === 0 ? (
+            <div className='text-center py-20 text-neutral-500'>No reviews available yet.</div>
+          ) : (
+            reviews.map((review) => (
+              <div
+                key={review._id}
+                className='flex items-start justify-between gap-4 px-6 py-6 hover:bg-neutral-50 transition-colors'>
+                <div className='flex gap-4 flex-1 min-w-0'>
+                  {/* User Initial Avatar */}
+                  <div className='w-12 h-12 shrink-0 rounded-full bg-[#3B4CCA] text-white flex items-center justify-center font-semibold text-lg'>
+                    {review.userId?.username?.charAt(0).toUpperCase() || "U"}
                   </div>
 
-                  <StarRating rating={review.rating} />
+                  <div className='space-y-2 min-w-0 flex-1'>
+                    <div className='flex flex-wrap items-center gap-x-3 gap-y-1 text-sm md:text-base'>
+                      <span className='font-bold text-gray-800'>
+                        {review.userId?.username || "Anonymous User"}
+                      </span>
+                      <span className='text-neutral-300 hidden md:inline'>|</span>
+                      <span className='text-blue-600 font-medium truncate'>
+                        {review.courseId?.Coursename || "General Feedback"}
+                      </span>
+                    </div>
 
-                  {review.text && <p className='text-gray-700 text-sm'>{review.text}</p>}
+                    <StarRating rating={review.rating || 0} />
 
-                  <div className='flex items-center gap-2 text-sm text-gray-500'>
-                    <Clock size={16} />
-                    {review.date}
+                    {review.comment ? (
+                      <p className='text-gray-700 text-sm leading-relaxed max-w-3xl'>
+                        {review.comment}
+                      </p>
+                    ) : (
+                      <p className='text-gray-400 text-sm italic'>No written comment provided.</p>
+                    )}
+
+                    <div className='flex items-center gap-2 text-xs text-gray-500 mt-2'>
+                      <Clock size={14} />
+                      {formatDate(review.createdAt)}
+                    </div>
                   </div>
                 </div>
               </div>
-
-              <button className='shrink-0 w-10 h-10 rounded-full bg-gray-100 hover:bg-red-100 flex items-center justify-center transition'>
-                <Trash2 size={18} className='text-blue-600 hover:text-red-500' />
-              </button>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </div>
