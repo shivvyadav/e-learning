@@ -1,80 +1,105 @@
-import React, { createContext, useState, useContext } from 'react';
-import { STORAGE_KEYS } from '../lib/constants';
+import React, {createContext, useContext, useEffect, useState, useCallback} from "react";
+import axios from "axios";
 
-const AdminContext = createContext(null);
+const AuthContext = createContext();
 
-export const AdminProvider = ({ children }) => {
-
-  const [admin, setAdmin] = useState(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEYS.ADMIN);
-      return stored ? JSON.parse(stored) : null;
-    } catch (error) {
-      console.error('Failed to parse admin:', error);
-      localStorage.removeItem(STORAGE_KEYS.ADMIN);
-      return null;
-    }
+export const AdminProvider = ({children}) => {
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem("user");
+    return savedUser ? JSON.parse(savedUser) : null;
   });
+  const [token, setToken] = useState(() => localStorage.getItem("token"));
+  const [loading, setLoading] = useState(true);
 
-  // FIX: `viewedCourses` and `addViewedCourse` were consumed in Courses.jsx,
-  // Home.jsx, and Profile.jsx but never defined or provided in this context.
-  const [viewedCourses, setViewedCourses] = useState(() => {
+  // --- Separate State Variables for Data ---
+  const [courses, setCourses] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [enrollments, setEnrollments] = useState([]);
+  const [reviews, setReviews] = useState([]);
+  const [dataLoading, setDataLoading] = useState(false);
+
+  // console.log(courses, users, enrollments, reviews);
+
+  const logout = useCallback(() => {
+    localStorage.removeItem("user");
+    localStorage.removeItem("token");
+    setUser(null);
+    setToken(null);
+    // Clear data on logout
+    setCourses([]);
+    setUsers([]);
+    setEnrollments([]);
+    setReviews([]);
+  }, []);
+
+  // Fetch function to populate all states
+  const fetchAllData = useCallback(async () => {
+    if (!token) return;
+
+    setDataLoading(true);
     try {
-      const stored = localStorage.getItem(STORAGE_KEYS.VIEWED_COURSES);
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
+      const BASE_URL = import.meta.env.VITE_BASE_URL || "http://localhost:3000";
+      const res = await axios.get(`${BASE_URL}/api/misc/datas`, {
+        headers: {Authorization: `Bearer ${token}`},
+      });
+
+      if (res.data.data) {
+        const {courses, users, enrollments, reviews} = res.data.data;
+        setCourses(courses || []);
+        setUsers(users || []);
+        setEnrollments(enrollments || []);
+        setReviews(reviews || []);
+      }
+    } catch (err) {
+      console.error("Error fetching admin dashboard data:", err);
+    } finally {
+      setDataLoading(false);
     }
-  });
+  }, [token]);
 
-  const addViewedCourse = (courseId) => {
-    setViewedCourses(prev => {
-      if (prev.includes(courseId)) return prev;
-      const updated = [...prev, courseId];
-      localStorage.setItem(STORAGE_KEYS.VIEWED_COURSES, JSON.stringify(updated));
-      return updated;
-    });
+  // Load Auth state
+  useEffect(() => {
+    setLoading(false);
+  }, []);
+
+  // Fetch data whenever user is authenticated
+  useEffect(() => {
+    if (token && user) {
+      fetchAllData();
+    }
+  }, [token, user, fetchAllData]);
+
+  const login = (userData, userToken) => {
+    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("token", userToken);
+    setUser(userData);
+    setToken(userToken);
   };
-
-  const login = (adminData) => {
-    localStorage.setItem(STORAGE_KEYS.ADMIN, JSON.stringify(adminData));
-    setAdmin(adminData);
-  };
-
-  const logout = () => {
-    localStorage.removeItem(STORAGE_KEYS.ADMIN);
-    localStorage.removeItem(STORAGE_KEYS.VIEWED_COURSES);
-    setAdmin(null);
-    setViewedCourses([]);
-  };
-
-  const isAuthenticated = !!admin;
 
   return (
-    <AdminContext.Provider
+    <AuthContext.Provider
       value={{
-        admin,
+        user,
+        token,
         login,
         logout,
-        isAuthenticated,
-        loading: false,
-        // FIX: Expose viewedCourses and addViewedCourse so consumers don't crash
-        viewedCourses,
-        addViewedCourse,
-      }}
-    >
+        isAuthenticated: !!token && !!user,
+        loading,
+        // Data States
+        courses,
+        users,
+        enrollments,
+        reviews,
+        dataLoading,
+        refreshAll: fetchAllData,
+      }}>
       {children}
-    </AdminContext.Provider>
+    </AuthContext.Provider>
   );
 };
 
-// eslint-disable-next-line react-refresh/only-export-components
-export const useAdmin = () => {
-  const context = useContext(AdminContext);
-  if (!context) {
-    throw new Error('useAdmin must be used within AdminProvider');
-  }
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) throw new Error("useAuth must be used inside AdminProvider");
   return context;
 };
-
-export default AdminContext;
