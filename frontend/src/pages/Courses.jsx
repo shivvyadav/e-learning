@@ -221,7 +221,7 @@ const Courses = () => {
 
       {/* --- ADD/EDIT MODAL --- */}
       {isModalOpen && (
-        <div className='fixed inset-0 z-[100] bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm'>
+        <div className='fixed inset-0 z-100 bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm'>
           <div className='bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl'>
             <div className='p-6 border-b flex justify-between items-center'>
               <h3 className='text-xl font-bold text-gray-800'>
@@ -240,7 +240,7 @@ const Courses = () => {
                   <label className='text-sm font-medium text-gray-700'>Course Name</label>
                   <input
                     required
-                    className='w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none'
+                    className='w-full border border-gray-500 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none'
                     value={formData.Coursename}
                     onChange={(e) => setFormData({...formData, Coursename: e.target.value})}
                   />
@@ -249,7 +249,7 @@ const Courses = () => {
                   <label className='text-sm font-medium text-gray-700'>Category</label>
                   <input
                     required
-                    className='w-full border rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none'
+                    className='w-full border border-gray-500 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none'
                     value={formData.category}
                     onChange={(e) => setFormData({...formData, category: e.target.value})}
                   />
@@ -260,7 +260,7 @@ const Courses = () => {
                 <label className='text-sm font-medium text-gray-700'>Description</label>
                 <textarea
                   required
-                  className='w-full border rounded-lg p-2 h-24 resize-none'
+                  className='w-full border border-gray-500 rounded-lg p-2 h-24 resize-none'
                   value={formData.Coursedescription}
                   onChange={(e) => setFormData({...formData, Coursedescription: e.target.value})}
                 />
@@ -272,7 +272,7 @@ const Courses = () => {
                   <input
                     type='number'
                     required
-                    className='w-full border rounded-lg p-2'
+                    className='w-full border border-gray-500 rounded-lg p-2'
                     value={formData.CoursePrice}
                     onChange={(e) => setFormData({...formData, CoursePrice: e.target.value})}
                   />
@@ -300,10 +300,12 @@ const Courses = () => {
                 </div>
 
                 {formData.modules.map((mod, mIdx) => (
-                  <div key={mIdx} className='bg-neutral-50 p-4 rounded-lg border mb-4 space-y-3'>
+                  <div
+                    key={mIdx}
+                    className='bg-neutral-50 p-4 rounded-lg border border-gray-500 mb-4 space-y-3'>
                     <input
                       placeholder='Module Title'
-                      className='w-full font-bold bg-transparent border-b outline-none pb-1'
+                      className='w-full font-bold bg-transparent border-b border-gray-500 outline-none pb-1'
                       value={mod.title}
                       onChange={(e) => updateModuleTitle(mIdx, e.target.value)}
                     />
@@ -341,7 +343,7 @@ const Courses = () => {
 
       {/* --- DELETE CONFIRMATION --- */}
       {isDeleteModalOpen && (
-        <div className='fixed inset-0 z-[110] bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm'>
+        <div className='fixed inset-0 z-110 bg-black/50 flex items-center justify-center p-4 backdrop-blur-sm'>
           <div className='bg-white rounded-xl p-6 w-full max-w-md shadow-2xl'>
             <h3 className='text-lg font-bold text-gray-800'>Delete Course?</h3>
             <p className='text-gray-600 mt-2'>
