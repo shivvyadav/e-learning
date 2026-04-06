@@ -1,13 +1,13 @@
 // TOP OF server.js - must be first!
-const dns = require('dns');
-dns.setDefaultResultOrder('ipv4first');
-dns.setServers(['8.8.8.8', '8.8.4.4']);
+const dns = require("dns");
+dns.setDefaultResultOrder("ipv4first");
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 require("dotenv").config();
 
-const  connectDB  = require("./config/db.js");
+const connectDB = require("./config/db.js");
 
 const app = express();
 
@@ -18,16 +18,13 @@ app.use(
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
-  })
+  }),
 );
 
 const path = require("path");
 
 // Serve uploaded files from /uploads
-app.use(
-  "/uploads",
-  express.static(path.join(__dirname, "../uploads")),
-);
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // Legacy: also serve files at root for existing URLs (keep backwards compatibility)
 app.use(express.static(path.join(__dirname, "../uploads")));
@@ -37,16 +34,15 @@ app.get("/admin", (req, res) => {
   res.sendFile(path.join(__dirname, "../admin.html"));
 });
 
-
-app.use(express.json())
-app.use(express.urlencoded({extended:true}))
+app.use(express.json());
+app.use(express.urlencoded({extended: true}));
 
 // cookies parser
 app.use(cookieParser());
 
 // basic route
 app.get("/", (req, res) => {
-  return res.json({ message: "Welcome to the E-learning API!" });
+  return res.json({message: "Welcome to the E-learning API!"});
 });
 
 // import routes
@@ -82,7 +78,5 @@ const port = process.env.PORT || 8000;
 
 connectDB().then(() => {
   console.log("Database connected, starting server...");
-  app.listen(port, () =>
-    console.log(`Server is running on port ${port}`)
-  );
+  app.listen(port, () => console.log(`Server is running on port ${port}`));
 });
